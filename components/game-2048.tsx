@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 
 type Tile = {
   id: number;
@@ -15,6 +16,10 @@ type Board = (Tile | null)[][];
 type Direction = "up" | "down" | "left" | "right";
 
 export default function Game2048() {
+  const { address, account } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+
   const [board, setBoard] = useState<Board>(() =>
     Array(4)
       .fill(null)
@@ -367,6 +372,11 @@ export default function Game2048() {
             <p className="text-[#776e65] text-lg">
               Join the numbers and get to the 2048 tile!
             </p>
+            {address && (
+              <p className="text-sm text-[#776e65] mt-2">
+                {`Connected: ${address.slice(0, 6)}...${address.slice(-4)}`}
+              </p>
+            )}
           </div>
           <div className="flex flex-col gap-3">
             {/* Score and Best side by side */}
@@ -385,13 +395,23 @@ export default function Game2048() {
                 <div className="text-white text-2xl font-bold">{bestScore}</div>
               </div>
             </div>
-            {/* New Game Button */}
-            <button
-              onClick={initGame}
-              className="bg-[#8f7a66] text-white px-6 py-3 rounded-md font-bold hover:bg-[#9f8a76] transition-colors"
-            >
-              New Game
-            </button>
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={initGame}
+                className="bg-[#8f7a66] text-white px-6 py-3 rounded-md font-bold hover:bg-[#9f8a76] transition-colors"
+              >
+                New Game
+              </button>
+              {account && (
+                <button
+                  onClick={() => disconnect()}
+                  className="bg-[#8f7a66] text-white px-6 py-3 rounded-md font-bold hover:bg-[#9f8a76] transition-colors"
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -404,6 +424,21 @@ export default function Game2048() {
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
         >
+          {!account && (
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-lg transition-opacity duration-300">
+              <h2 className="text-3xl font-bold text-white mb-6">
+                Connect your wallet to play
+              </h2>
+              <button
+                onClick={() => connect({ connector: connectors[0] })}
+                disabled={!connectors[0]}
+                className="bg-[#f67c5f] text-white px-8 py-4 rounded-md font-bold hover:bg-[#f56a4a] transition-colors text-xl disabled:bg-gray-400"
+              >
+                {connectors.length > 0 ? "Connect Wallet" : "Loading..."}
+              </button>
+            </div>
+          )}
+
           {/* Grid Background */}
           <div className="grid grid-cols-4 gap-4 h-full w-full">
             {Array.from({ length: 16 }).map((_, index) => (
