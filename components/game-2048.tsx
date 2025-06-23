@@ -358,7 +358,7 @@ export default function Game2048() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#faf8ef] p-4 font-sans">
+    <div className="flex flex-col items-center min-h-screen bg-[#faf8ef] p-4 font-sans pt-16">
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="flex justify-between items-start mb-6">
